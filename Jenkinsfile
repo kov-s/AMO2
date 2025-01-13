@@ -1,37 +1,21 @@
 pipeline {
-    agent {
-        docker { image 'python:3.9-slim' }
-    }
+    agent any
     stages {
-        stage('Setup') {
+        stage('Checkout') {
             steps {
-                sh 'pip install pandas scikit-learn joblib'
+                git url: 'https://github.com/kov-s/AMO2/'
             }
         }
-        stage('Fetch Data') {
-            steps {
-                sh 'wget https://example.com/data.csv'
+        stage('Build') {
+            agent {
+                docker {
+                    image 'python:3.9-slim'
+                }
             }
-        }
-        stage('Prepare Data') {
             steps {
-                sh 'python data_preparation.py'
+                sh 'docker inspect -f . python:3.9-slim'
+                sh 'docker pull python:3.9-slim'
             }
-        }
-        stage('Train Model') {
-            steps {
-                sh 'python model_training.py'
-            }
-        }
-        stage('Evaluate Model') {
-            steps {
-                sh 'python model_evaluation.py'
-            }
-        }
-    }
-    post {
-        always {
-            archiveArtifacts artifacts: '*.pkl, *.csv', fingerprint: true
         }
     }
 }
